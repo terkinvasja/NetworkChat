@@ -15,4 +15,12 @@ public class Message implements Serializable {
         this.type = type;
         this.data = data;
     }
+
+    public MessageType getType() {
+        return type;
+    }
+
+    public String getData() {
+        return data;
+    }
 }

@@ -16,8 +16,21 @@ public class Connection implements Closeable {
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.in = new ObjectInputStream(socket.getInputStream());
     }
-//TODO
-    public void close() throws IOException {
 
+    public void send(Message message) throws IOException {
+        out.writeObject(message);
+        out.flush();
+    }
+
+    public Message receive() throws IOException, ClassNotFoundException {
+        Message message = (Message) in.readObject();
+        return message;
+    }
+//TODO
+
+    public void close() throws IOException {
+        in.close();
+        out.close();
+        socket.close();
     }
 }
