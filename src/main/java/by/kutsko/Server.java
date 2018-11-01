@@ -5,12 +5,15 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class Server {
 
     private static final Logger LOG = getLogger(Server.class);
+    static ConcurrentLinkedDeque<HandlerAgent> agentDeque = new ConcurrentLinkedDeque<>();
+    static ConcurrentLinkedDeque<Connection> clientDeque = new ConcurrentLinkedDeque<>();
 
     public static void main(String[] args) {
 
@@ -31,58 +34,22 @@ public class Server {
         }
     }
 
-    private static class Handler extends Thread {
+    private static class Handler1 {
         private Socket socket;
 
-        public Handler(Socket socket) {
+        public Handler1(Socket socket) {
             this.socket = socket;
             LOG.debug("Handler created");
         }
 
-        @Override
-        public void run() {
-            LOG.debug("Connection established with " + socket.getRemoteSocketAddress());
-            String clientName;
-            String agentName;
-            try (Connection connection = new Connection(socket)) {
-//                clientName = serverHandshake(connection);
-
-                serverHandshake(connection);
-
-                clientName = connection.receive().getData();
-                serverMainLoop(connection, clientName);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            LOG.debug("Handler.close");
-        }
-
         /**
-         * Handshake
+         * Цикл обработки сообщений сервером от клиента
          **/
-        private void serverHandshake(Connection connection) throws IOException, ClassNotFoundException {
-            LOG.debug("Handler.serverHandshake");
-/*            while (true) {
-                //Получаем запрос на регистрацию
-                Message message = connection.receive();
-
-                if (message.getType() == MessageType.ADD_AGENT || message.getType() == MessageType.ADD_CLIENT) {
-                    connection.send(new Message(MessageType.ACCEPTED));
-                }
-                return message.getData();
-            }*/
-            connection.send(new Message(MessageType.ACCEPTED));
-        }
-
-        /**
-         * Главный цикл обработки сообщений сервером
-         **/
-        private void serverMainLoop(Connection connection, String name) throws IOException, ClassNotFoundException {
-            LOG.debug("Handler.serverMainLoop");
+        private void serverMainLoopAgent(Connection connection) throws IOException, ClassNotFoundException {
+            LOG.debug("Handler.serverMainLoopAgent");
+            Connection clientConnection;
             while (true) {
-                //Принимаем сообщения клиента
+                //Принимаем сообщения агента
                 Message message = connection.receive();
 
                 switch (message.getType()) {

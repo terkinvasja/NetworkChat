@@ -18,13 +18,18 @@ public class Connection implements Closeable {
     }
 
     public void send(Message message) throws IOException {
-        out.writeObject(message);
-        out.flush();
+        synchronized (out) {
+            out.writeObject(message);
+            out.flush();
+        }
     }
 
     public Message receive() throws IOException, ClassNotFoundException {
-        Message message = (Message) in.readObject();
-        return message;
+        Message message;
+        synchronized (in) {
+            message = (Message) in.readObject();
+            return message;
+        }
     }
 //TODO
 

@@ -15,6 +15,7 @@ public class Client {
 
     private static final Logger LOG = getLogger(Client.class);
     private Connection connection;
+    private String name;
 
     public static void main(String[] args) {
 
@@ -30,6 +31,7 @@ public class Client {
             if (!(message = ConsoleHelper.readString()).equals("/exit")) {
                 String[] msg = message.split(" ");
                 if (msg[0].equals("/register")) {
+                    name = msg[2];
                     SocketThread socketThread = new SocketThread();
                     //Пометить созданный поток как daemon, это нужно для того, чтобы при выходе из программы
                     //вспомогательный поток прервался автоматически
@@ -51,9 +53,9 @@ public class Client {
                     LOG.debug("Client. Sending registration data");
                     try {
                         if (msg[1].equals("agent")) {
-                            connection.send(new Message(MessageType.ADD_AGENT, msg[2]));
+                            connection.send(new Message(MessageType.ADD_AGENT, name));
                         } else if (msg[1].equals("client")) {
-                            connection.send(new Message(MessageType.ADD_CLIENT, msg[2]));
+                            connection.send(new Message(MessageType.ADD_CLIENT, name));
                         }
                     } catch (IOException e) {
                         ConsoleHelper.writeMessage("Ошибка отправки");
@@ -61,7 +63,7 @@ public class Client {
 
                     while (true) {
                         if (!(message = ConsoleHelper.readString()).equals("/leave")) {
-                            sendTextMessage(message);
+                            sendTextMessage(name + ": " + message);
                         } else {
                             try {
                                 connection.send(new Message(MessageType.LEAVE));
@@ -139,7 +141,7 @@ public class Client {
 
                 switch (message.getType()) {
                     case TEXT: {
-                        ConsoleHelper.writeMessage("agent: " + message.getData());
+                        ConsoleHelper.writeMessage(message.getData());
                         break;
                     }
                     default: {
