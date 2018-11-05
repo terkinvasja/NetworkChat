@@ -29,12 +29,22 @@ public class HandlerAgent extends Thread {
                 switch (message.getType()) {
                     case TEXT: {
                         ConsoleHelper.writeMessage(message.getData());
-                        Server.rooms.get(connection.getName()).send(message);
+                        if (Server.rooms.containsKey(connection.getName())) {
+                            Server.rooms.get(connection.getName()).getConnection().send(message);
+                        } else {
+                            connection.send(new Message(MessageType.TEXT, "Нет подключенных клиентов"));
+                        }
                         break;
                     }
                     case LEAVE: {
+                        String agentName = connection.getName();
                         connection.close();
-                        LOG.debug("Connection closed");
+                        if (Server.rooms.containsKey(agentName)) {
+                            Server.rooms.get(agentName).getConnection()
+                                    .send(new Message(MessageType.TEXT, "Агент разорвал соединение"));
+                            Server.reGetAgent(agentName);
+                        }
+                        LOG.debug("Agent connection closed");
                         return;
                     }
                     default: {

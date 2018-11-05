@@ -31,11 +31,13 @@ public class Handler extends Thread {
                 case ADD_AGENT: {
                     Server.agentQueue.add(connection);
                     new HandlerAgent(connection);
+                    Server.getAgent();
                     break;
                 }
                 case ADD_CLIENT: {
-                    //Server.clientDeque.add(connection);
-                    new HandlerClient(connection);
+                    HandlerClient handlerClient = new HandlerClient(connection);
+                    Server.clientDeque.add(handlerClient);
+                    Server.getAgent();
                     break;
                 }
                 default: {
