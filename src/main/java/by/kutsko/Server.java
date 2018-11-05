@@ -5,15 +5,18 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class Server {
 
     private static final Logger LOG = getLogger(Server.class);
-    static ConcurrentLinkedDeque<HandlerAgent> agentDeque = new ConcurrentLinkedDeque<>();
-    static ConcurrentLinkedDeque<Connection> clientDeque = new ConcurrentLinkedDeque<>();
+    static ConcurrentLinkedQueue<Connection> agentQueue = new ConcurrentLinkedQueue<>();
+    static ConcurrentLinkedQueue<Connection> clientDeque = new ConcurrentLinkedQueue<>();
+    static ConcurrentHashMap<String, Connection> rooms = new ConcurrentHashMap<>();
+    static ConcurrentHashMap<String, Connection> agents = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
 
@@ -34,39 +37,19 @@ public class Server {
         }
     }
 
-    private static class Handler1 {
-        private Socket socket;
-
-        public Handler1(Socket socket) {
-            this.socket = socket;
-            LOG.debug("Handler created");
+    static String getAgent(Connection clientConnection) {
+        if(!agentQueue.isEmpty()) {
+            Connection agent = agentQueue.poll();
+            agents.put(agent.getName(), agent);
+            rooms.put(agent.getName(), clientConnection);
+            return agent.getName();
+        } else {
+            return "";
         }
+    }
 
-        /**
-         * Цикл обработки сообщений сервером от клиента
-         **/
-        private void serverMainLoopAgent(Connection connection) throws IOException, ClassNotFoundException {
-            LOG.debug("Handler.serverMainLoopAgent");
-            Connection clientConnection;
-            while (true) {
-                //Принимаем сообщения агента
-                Message message = connection.receive();
-
-                switch (message.getType()) {
-                    case TEXT: {
-                        ConsoleHelper.writeMessage(message.getData());
-                        break;
-                    }
-                    case LEAVE: {
-                        connection.close();
-                        LOG.debug("Connection closed");
-                        return;
-                    }
-                    default: {
-                        ConsoleHelper.writeMessage("Error");
-                    }
-                }
-            }
-        }
+    static void returnAgent(String agentName){
+        rooms.remove(agentName);
+        agentQueue.add(agents.get(agentName));
     }
 }

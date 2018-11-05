@@ -26,14 +26,15 @@ public class Handler extends Thread {
 
             //We define the agent or client
             Message message = connection.receive();
+            connection.setName(message.getData());
             switch (message.getType()) {
                 case ADD_AGENT: {
-                    HandlerAgent handlerAgent = new HandlerAgent(connection);
-                    Server.agentDeque.addLast(handlerAgent);
+                    Server.agentQueue.add(connection);
+                    new HandlerAgent(connection);
                     break;
                 }
                 case ADD_CLIENT: {
-                    Server.clientDeque.addLast(connection);
+                    //Server.clientDeque.add(connection);
                     new HandlerClient(connection);
                     break;
                 }

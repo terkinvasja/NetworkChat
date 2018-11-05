@@ -11,7 +11,6 @@ public class HandlerAgent extends Thread {
     private static final Logger LOG = getLogger(HandlerAgent.class);
 
     private Connection connection;
-    private Connection client;
 
     public HandlerAgent(Connection connection) {
         this.connection = connection;
@@ -30,7 +29,7 @@ public class HandlerAgent extends Thread {
                 switch (message.getType()) {
                     case TEXT: {
                         ConsoleHelper.writeMessage(message.getData());
-                        client.send(message);
+                        Server.rooms.get(connection.getName()).send(message);
                         break;
                     }
                     case LEAVE: {
@@ -48,13 +47,5 @@ public class HandlerAgent extends Thread {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public void setClient(Connection client) {
-        this.client = client;
     }
 }

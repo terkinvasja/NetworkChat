@@ -10,6 +10,7 @@ public class Connection implements Closeable {
     private final Socket socket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
+    private String name;
 
     public Connection(Socket socket) throws IOException {
         this.socket = socket;
@@ -32,6 +33,15 @@ public class Connection implements Closeable {
         }
     }
 //TODO
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public void close() throws IOException {
         in.close();

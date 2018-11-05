@@ -20,11 +20,12 @@ public class HandlerClient extends Thread {
     @Override
     public void run() {
         LOG.debug("HandlerClient.run");
-        HandlerAgent handlerAgent = Server.agentDeque.getFirst();
-        Connection agentConnection = handlerAgent.getConnection();
-        handlerAgent.setClient(this.connection);
 
         try {
+            String agentName = Server.getAgent(connection);
+            Server.agents.get(agentName).send(new Message(MessageType.TEXT,
+                    String.format("Клиент %s присоеденился к чату", connection.getName())));
+
             while (true) {
                 //Принимаем сообщения клиента
                 Message message = connection.receive();
@@ -32,13 +33,14 @@ public class HandlerClient extends Thread {
                 switch (message.getType()) {
                     case TEXT: {
                         ConsoleHelper.writeMessage(message.getData());
-                        agentConnection.send(message);
+                        Server.agents.get(agentName).send(message);
                         break;
                     }
                     case LEAVE: {
                         connection.close();
                         LOG.debug("Connection closed");
-                        Server.agentDeque.addLast(handlerAgent);
+                        Server.returnAgent(agentName);
+                        Server.agents.get(agentName).send(new Message(MessageType.TEXT, "Клиент закончил чат"));
                         return;
                     }
                     default: {
