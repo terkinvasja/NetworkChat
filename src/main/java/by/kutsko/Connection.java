@@ -10,12 +10,19 @@ public class Connection implements Closeable {
     private final Socket socket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
+    private String connectionUUID;
     private String name;
 
     public Connection(Socket socket) throws IOException {
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.in = new ObjectInputStream(socket.getInputStream());
+        this.connectionUUID = "";
+    }
+
+    public Connection(Socket socket, String connectionUUID) throws IOException {
+        this(socket);
+        this.connectionUUID = connectionUUID;
     }
 
     public void send(Message message) throws IOException {
@@ -34,6 +41,10 @@ public class Connection implements Closeable {
     }
 //TODO
 
+
+    public String getConnectionUUID() {
+        return connectionUUID;
+    }
 
     public String getName() {
         return name;

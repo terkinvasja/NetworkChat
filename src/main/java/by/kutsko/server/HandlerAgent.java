@@ -1,5 +1,9 @@
-package by.kutsko;
+package by.kutsko.server;
 
+import by.kutsko.Connection;
+import by.kutsko.Message;
+import by.kutsko.MessageType;
+import by.kutsko.util.ConsoleHelper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -29,20 +33,20 @@ public class HandlerAgent extends Thread {
                 switch (message.getType()) {
                     case TEXT: {
                         ConsoleHelper.writeMessage(message.getData());
-                        if (Server.rooms.containsKey(connection.getName())) {
-                            Server.rooms.get(connection.getName()).getConnection().send(message);
+                        if (ServerCondition.rooms.containsKey(connection.getConnectionUUID())) {
+                            ServerCondition.rooms.get(connection.getConnectionUUID()).send(message);
                         } else {
                             connection.send(new Message(MessageType.TEXT, "Нет подключенных клиентов"));
                         }
                         break;
                     }
                     case LEAVE: {
-                        String agentName = connection.getName();
+                        String connectionUUID = connection.getConnectionUUID();
                         connection.close();
-                        if (Server.rooms.containsKey(agentName)) {
-                            Server.rooms.get(agentName).getConnection()
+                        if (ServerCondition.rooms.containsKey(connectionUUID)) {
+                            ServerCondition.rooms.get(connectionUUID)
                                     .send(new Message(MessageType.TEXT, "Агент разорвал соединение"));
-                            Server.reGetAgent(agentName);
+                            ServerCondition.reGetAgent(connectionUUID);
                         }
                         LOG.debug("Agent connection closed");
                         return;

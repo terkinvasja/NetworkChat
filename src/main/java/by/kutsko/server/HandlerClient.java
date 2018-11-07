@@ -1,5 +1,9 @@
-package by.kutsko;
+package by.kutsko.server;
 
+import by.kutsko.Connection;
+import by.kutsko.Message;
+import by.kutsko.MessageType;
+import by.kutsko.util.ConsoleHelper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -11,7 +15,6 @@ public class HandlerClient extends Thread {
     private static final Logger LOG = getLogger(HandlerClient.class);
 
     private Connection connection;
-    private String agentName = "";
 
     public HandlerClient(Connection connection) {
         this.connection = connection;
@@ -28,9 +31,9 @@ public class HandlerClient extends Thread {
 
                 switch (message.getType()) {
                     case TEXT: {
-                        if (!agentName.isEmpty()) {
-                            ConsoleHelper.writeMessage(message.getData());
-                            Server.agents.get(agentName).send(message);
+                        ConsoleHelper.writeMessage(message.getData());
+                        if (ServerCondition.rooms.containsKey(connection.getConnectionUUID())) {
+                            ServerCondition.rooms.get(connection.getConnectionUUID()).send(message);
                         } else {
                             connection.send(new Message(MessageType.TEXT,
                                     "Server: Нет свободного агента. Пожалуйста подождите"));
@@ -38,10 +41,10 @@ public class HandlerClient extends Thread {
                         break;
                     }
                     case LEAVE: {
+                        String connectionUUID = connection.getConnectionUUID();
                         connection.close();
-                        if (!agentName.isEmpty()) {
-                            Server.returnAgent(agentName);
-                            Server.agents.get(agentName).send(new Message(MessageType.TEXT, "Клиент закончил чат"));
+                        if (ServerCondition.rooms.containsKey(connectionUUID)) {
+                            ServerCondition.returnAgent(connectionUUID);
                         }
                         LOG.debug("Client connection closed");
                         return;
@@ -56,20 +59,5 @@ public class HandlerClient extends Thread {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-    }
-
-    void initAgent(String name) {
-        agentName = name;
-        try {
-            Server.agents.get(agentName).send(new Message(MessageType.TEXT,
-                    String.format("Клиент %s присоеденился к чату", connection.getName())));
-            connection.send(new Message(MessageType.TEXT, "Ваш агент: " + agentName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 }

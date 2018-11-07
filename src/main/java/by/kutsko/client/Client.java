@@ -1,7 +1,7 @@
 package by.kutsko.client;
 
 import by.kutsko.Connection;
-import by.kutsko.ConsoleHelper;
+import by.kutsko.util.ConsoleHelper;
 import by.kutsko.Message;
 import by.kutsko.MessageType;
 import org.slf4j.Logger;

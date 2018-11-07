@@ -56,7 +56,7 @@
                             <finalName>Server</finalName>
                             <archive>
                                 <manifest>
-                                    <mainClass>by.kutsko.Server</mainClass>
+                                    <mainClass>by.kutsko.server.Server</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>
