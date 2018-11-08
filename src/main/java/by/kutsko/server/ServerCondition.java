@@ -21,21 +21,53 @@ public class ServerCondition {
     static ConcurrentHashMap<String, Connection> agents = new ConcurrentHashMap<>();
 
     static synchronized void getAgent() {
-        if (!clientDeque.isEmpty()) {
-            if (!agentQueue.isEmpty()) {
-                Connection agent = agentQueue.poll();
-                Connection client = clientDeque.poll();
-                rooms.put(agent.getConnectionUUID(), client);
-                rooms.put(client.getConnectionUUID(), agent);
-                try {
-                    agent.send(new Message(MessageType.TEXT,
-                            String.format("Клиент %s присоеденился к чату", client.getName())));
-                    client.send(new Message(MessageType.TEXT, "Ваш агент: " + agent.getName()));
-                } catch (IOException e) {
-                    e.printStackTrace();
+        Connection agentConnection;
+        Connection clientConnection;
+//        if (!clientDeque.isEmpty()) {
+//            if (!agentQueue.isEmpty()) {
+
+                do {
+                    agentConnection = agentQueue.poll();
+                    System.out.println(agentConnection.getName() + " - " + agentConnection.isClosed());
+                    if (agentConnection == null) break;
+                    if (!agentConnection.isClosed()) {
+                        break;
+                    } else {
+                        agentConnection = null;
+                    }
+                } while (!agentQueue.isEmpty());
+
+                do {
+                    clientConnection = clientDeque.poll();
+                    System.out.println(clientConnection.getName() + " - " + clientConnection.isClosed());
+                    if (clientConnection == null) break;
+                    if (!clientConnection.isClosed()) {
+                        break;
+                    } else {
+                        clientConnection = null;
+                    }
+                } while (!clientDeque.isEmpty());
+
+                if ((agentConnection != null) && (clientConnection != null)) {
+                    rooms.put(agentConnection.getConnectionUUID(), clientConnection);
+                    rooms.put(clientConnection.getConnectionUUID(), agentConnection);
+                    try {
+                        agentConnection.send(new Message(MessageType.TEXT,
+                                String.format("Server: Клиент %s присоеденился к чату", clientConnection.getName())));
+                        clientConnection.send(new Message(MessageType.TEXT, "Server: Ваш агент " + agentConnection.getName()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (agentConnection != null) {
+                    System.out.println("agent return");
+                    agentQueue.add(agentConnection);
+                } else if (clientConnection != null) {
+                    System.out.println("client return");
+                    clientDeque.add(clientConnection);
                 }
-            }
-        }
+
+//            }
+//        }
         LOG.debug("Server.getAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
     }
 
@@ -44,12 +76,15 @@ public class ServerCondition {
         Connection agentConnection = rooms.get(connectionUUID);
         agentQueue.add(agentConnection);
         rooms.remove(connectionUUID);
+        String clientName = rooms.get(agentConnection.getConnectionUUID()).getName();
         rooms.remove(agentConnection.getConnectionUUID());
         try {
-            agentConnection.send(new Message(MessageType.TEXT, "Клиент закончил чат"));
+            agentConnection.send(new Message(MessageType.TEXT,
+                    String.format("Server: Клиент %s закончил чат", clientName)));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        LOG.debug("Server.returnAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
         getAgent();
     }
 
@@ -57,7 +92,13 @@ public class ServerCondition {
         Connection client = rooms.get(connectionUUID);
         rooms.remove(connectionUUID);
         clientDeque.addFirst(client);
+        LOG.debug("Server.reGetAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
         getAgent();
+    }
+
+    static synchronized void deleteUUID(String connectionUUID) {
+        rooms.remove(connectionUUID);
+        LOG.debug("Server.deleteUUID clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
     }
 
 }

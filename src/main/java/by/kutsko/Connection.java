@@ -1,12 +1,17 @@
 package by.kutsko;
 
+import org.slf4j.Logger;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class Connection implements Closeable {
+    private static final Logger LOG = getLogger(Connection.class);
     private final Socket socket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
@@ -29,6 +34,7 @@ public class Connection implements Closeable {
         synchronized (out) {
             out.writeObject(message);
             out.flush();
+            LOG.debug("Connection.send");
         }
     }
 
@@ -36,8 +42,13 @@ public class Connection implements Closeable {
         Message message;
         synchronized (in) {
             message = (Message) in.readObject();
+            LOG.debug("Connection.receive");
             return message;
         }
+    }
+
+    public boolean isClosed() {
+        return socket.isClosed();
     }
 //TODO
 
@@ -58,5 +69,6 @@ public class Connection implements Closeable {
         in.close();
         out.close();
         socket.close();
+        LOG.debug("Connection.close");
     }
 }

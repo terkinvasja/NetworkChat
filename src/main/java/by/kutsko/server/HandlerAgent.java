@@ -15,9 +15,11 @@ public class HandlerAgent extends Thread {
     private static final Logger LOG = getLogger(HandlerAgent.class);
 
     private Connection connection;
+    private String connectionUUID;
 
     public HandlerAgent(Connection connection) {
         this.connection = connection;
+        connectionUUID = connection.getConnectionUUID();
         start();
     }
 
@@ -33,22 +35,16 @@ public class HandlerAgent extends Thread {
                 switch (message.getType()) {
                     case TEXT: {
                         ConsoleHelper.writeMessage(message.getData());
-                        if (ServerCondition.rooms.containsKey(connection.getConnectionUUID())) {
-                            ServerCondition.rooms.get(connection.getConnectionUUID()).send(message);
+                        if (ServerCondition.rooms.containsKey(connectionUUID)) {
+                            ServerCondition.rooms.get(connectionUUID).send(message);
                         } else {
-                            connection.send(new Message(MessageType.TEXT, "Нет подключенных клиентов"));
+                            connection.send(new Message(MessageType.TEXT, "Server: Нет подключенных клиентов"));
                         }
                         break;
                     }
                     case LEAVE: {
-                        String connectionUUID = connection.getConnectionUUID();
-                        connection.close();
-                        if (ServerCondition.rooms.containsKey(connectionUUID)) {
-                            ServerCondition.rooms.get(connectionUUID)
-                                    .send(new Message(MessageType.TEXT, "Агент разорвал соединение"));
-                            ServerCondition.reGetAgent(connectionUUID);
-                        }
-                        LOG.debug("Agent connection closed");
+
+                        deleteAgent();
                         return;
                     }
                     default: {
@@ -58,8 +54,25 @@ public class HandlerAgent extends Thread {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            try {
+                deleteAgent();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private void deleteAgent() throws IOException {
+        connection.close();
+        if (ServerCondition.rooms.containsKey(connectionUUID)) {
+            ServerCondition.rooms.get(connectionUUID)
+                    .send(new Message(MessageType.TEXT, "Server: Агент разорвал соединение"));
+            ServerCondition.reGetAgent(connectionUUID);
+        } else {
+            ServerCondition.deleteUUID(connectionUUID);
+        }
+        LOG.debug("Agent connection closed");
     }
 }

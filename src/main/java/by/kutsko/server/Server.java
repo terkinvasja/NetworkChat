@@ -1,6 +1,5 @@
 package by.kutsko.server;
 
-import by.kutsko.Connection;
 import by.kutsko.util.ConsoleHelper;
 import org.slf4j.Logger;
 
