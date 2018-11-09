@@ -6,6 +6,7 @@ import by.kutsko.MessageType;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -26,27 +27,9 @@ public class ServerCondition {
 //        if (!clientDeque.isEmpty()) {
 //            if (!agentQueue.isEmpty()) {
 
-                do {
-                    agentConnection = agentQueue.poll();
-                    System.out.println(agentConnection.getName() + " - " + agentConnection.isClosed());
-                    if (agentConnection == null) break;
-                    if (!agentConnection.isClosed()) {
-                        break;
-                    } else {
-                        agentConnection = null;
-                    }
-                } while (!agentQueue.isEmpty());
+        agentConnection = searchValidConnection(agentQueue);
+        clientConnection = searchValidConnection(clientDeque);
 
-                do {
-                    clientConnection = clientDeque.poll();
-                    System.out.println(clientConnection.getName() + " - " + clientConnection.isClosed());
-                    if (clientConnection == null) break;
-                    if (!clientConnection.isClosed()) {
-                        break;
-                    } else {
-                        clientConnection = null;
-                    }
-                } while (!clientDeque.isEmpty());
 
                 if ((agentConnection != null) && (clientConnection != null)) {
                     rooms.put(agentConnection.getConnectionUUID(), clientConnection);
@@ -99,6 +82,20 @@ public class ServerCondition {
     static synchronized void deleteUUID(String connectionUUID) {
         rooms.remove(connectionUUID);
         LOG.debug("Server.deleteUUID clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
+    }
+
+    private static Connection searchValidConnection(Queue<Connection> linkedQueue) {
+        Connection connection;
+        do {
+            connection = linkedQueue.poll();
+            if (connection == null) break;
+            if (!connection.isClosed()) {
+                break;
+            } else {
+                connection = null;
+            }
+        } while (!agentQueue.isEmpty());
+        return connection;
     }
 
 }
