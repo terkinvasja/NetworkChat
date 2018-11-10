@@ -33,9 +33,7 @@ public class Client {
             String message;
             if (!(message = ConsoleHelper.readString()).equals("/exit")) {
                 Matcher m = p.matcher(message);
-                //String[] msg = message.split(" ");
                 if (m.matches()) {
-                    ConsoleHelper.writeMessage(String.format("%s, %s, %s", m.group(1), m.group(2), m.group(3)));
                     name = m.group(3);
                     SocketThread socketThread = new SocketThread();
                     //Пометить созданный поток как daemon, это нужно для того, чтобы при выходе из программы

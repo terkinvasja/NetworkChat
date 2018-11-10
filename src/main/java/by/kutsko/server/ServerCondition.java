@@ -24,39 +24,34 @@ public class ServerCondition {
     static synchronized void getAgent() {
         Connection agentConnection;
         Connection clientConnection;
-//        if (!clientDeque.isEmpty()) {
-//            if (!agentQueue.isEmpty()) {
 
         agentConnection = searchValidConnection(agentQueue);
         clientConnection = searchValidConnection(clientDeque);
 
-
-                if ((agentConnection != null) && (clientConnection != null)) {
-                    rooms.put(agentConnection.getConnectionUUID(), clientConnection);
-                    rooms.put(clientConnection.getConnectionUUID(), agentConnection);
-                    LOG.debug(String.format("%s and %s start chat.",
-                            agentConnection.getConnectionUUID(), clientConnection.getConnectionUUID()));
-                    try {
-                        agentConnection.send(new Message(MessageType.TEXT,
-                                String.format("Server: Клиент %s присоеденился к чату", clientConnection.getName())));
-                        clientConnection.send(new Message(MessageType.TEXT, "Server: Ваш агент " + agentConnection.getName()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else if (agentConnection != null) {
-                    LOG.debug(String.format("Agent %s return to queue.", agentConnection.getConnectionUUID()));
-                    agentQueue.add(agentConnection);
-                } else if (clientConnection != null) {
-                    LOG.debug(String.format("Client %s return to queue.", clientConnection.getConnectionUUID()));
-                    clientDeque.add(clientConnection);
-                }
-
-//            }
-//        }
+        if ((agentConnection != null) && (clientConnection != null)) {
+            rooms.put(agentConnection.getConnectionUUID(), clientConnection);
+            rooms.put(clientConnection.getConnectionUUID(), agentConnection);
+            LOG.debug(String.format("%s and %s start chat.",
+                    agentConnection.getConnectionUUID(), clientConnection.getConnectionUUID()));
+            try {
+                agentConnection.send(new Message(MessageType.TEXT,
+                        String.format("Server: Клиент %s присоеденился к чату", clientConnection.getName())));
+                clientConnection.send(new Message(MessageType.TEXT,
+                        "Server: Ваш агент " + agentConnection.getName()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (agentConnection != null) {
+            LOG.debug(String.format("Agent %s return to queue.", agentConnection.getConnectionUUID()));
+            agentQueue.add(agentConnection);
+        } else if (clientConnection != null) {
+            LOG.debug(String.format("Client %s return to queue.", clientConnection.getConnectionUUID()));
+            clientDeque.add(clientConnection);
+        }
         LOG.debug("Server.getAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
     }
 
-    static synchronized void returnAgent(String clientConnectionUUID){
+    static synchronized void returnAgent(String clientConnectionUUID) {
         LOG.debug("Server.returnAgent");
         Connection agentConnection = rooms.get(clientConnectionUUID);
         LOG.debug(String.format("Client %s end chat. Agent %s return to queue.", clientConnectionUUID, agentConnection.getConnectionUUID()));

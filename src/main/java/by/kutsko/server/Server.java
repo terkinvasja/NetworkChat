@@ -27,7 +27,6 @@ public class Server {
                 Socket socket = serverSocket.accept();
                 Handler handler = new Handler(socket);
                 //Start Handler Tread
-                //handler.start();
                 servicePool.submit(handler);
             }
         } catch (IOException e) {

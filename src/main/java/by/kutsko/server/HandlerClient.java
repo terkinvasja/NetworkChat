@@ -76,8 +76,9 @@ public class HandlerClient extends Thread {
         connection.close();
         if (ServerCondition.rooms.containsKey(connectionUUID)) {
             if (typeClient == 0) {
-//                Connection clientConnection = ServerCondition.rooms.get(connectionUUID);
-//                clientConnection.send(new Message(MessageType.TEXT, "Server: Агент разорвал соединение. Подождите пока подключится новый агент."));
+                Connection clientConnection = ServerCondition.rooms.get(connectionUUID);
+                clientConnection.send(new Message(MessageType.TEXT,
+                        "Server: Агент разорвал соединение. Подождите пока подключится новый агент."));
                 ServerCondition.reGetAgent(connectionUUID);
             } else {
                 ServerCondition.returnAgent(connectionUUID);
