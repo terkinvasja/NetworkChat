@@ -72,6 +72,7 @@ public class Client {
                         } else {
                             try {
                                 connection.send(new Message(MessageType.LEAVE));
+                                connection.close();
                                 break;
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -114,7 +115,7 @@ public class Client {
                 //Вызов метода, реализующего основной цикл обработки сообщений сервера.
                 clientMainLoop();
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
 

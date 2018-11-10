@@ -15,38 +15,44 @@ public class HandlerClient extends Thread {
     private static final Logger LOG = getLogger(HandlerClient.class);
 
     private Connection connection;
+    private String connectionUUID;
+    private int typeClient;
 
-    public HandlerClient(Connection connection) {
+    public HandlerClient(Connection connection, int typeClient) {
         this.connection = connection;
+        this.typeClient = typeClient;
+        connectionUUID = connection.getConnectionUUID();
         start();
     }
 
     @Override
     public void run() {
-        LOG.debug("HandlerClient.run");
+        LOG.debug(String.format("HandlerClient.run %s", typeClient));
+
         try {
             while (true) {
-                //Принимаем сообщения клиента
+                //Принимаем сообщения агента
                 Message message = connection.receive();
 
                 switch (message.getType()) {
                     case TEXT: {
-//                        ConsoleHelper.writeMessage(message.getData());
-                        if (ServerCondition.rooms.containsKey(connection.getConnectionUUID())) {
-                            ServerCondition.rooms.get(connection.getConnectionUUID()).send(message);
+                        if (ServerCondition.rooms.containsKey(connectionUUID)) {
+                            if (!ServerCondition.rooms.get(connectionUUID).isClosed()) {
+                                ServerCondition.rooms.get(connectionUUID).send(message);
+                            }
                         } else {
-                            connection.send(new Message(MessageType.TEXT,
-                                    "Server: Нет свободного агента. Пожалуйста подождите"));
+                            if (typeClient == 0) {
+                                connection.send(new Message(MessageType.TEXT,
+                                        "Server: Нет подключенных клиентов"));
+                            } else {
+                                connection.send(new Message(MessageType.TEXT,
+                                        "Server: Нет свободного агента. Пожалуйста подождите"));
+                            }
                         }
                         break;
                     }
                     case LEAVE: {
-                        String connectionUUID = connection.getConnectionUUID();
-                        connection.close();
-                        if (ServerCondition.rooms.containsKey(connectionUUID)) {
-                            ServerCondition.returnAgent(connectionUUID);
-                        }
-                        LOG.debug("Client connection closed");
+                        deleteClient();
                         return;
                     }
                     default: {
@@ -54,8 +60,31 @@ public class HandlerClient extends Thread {
                     }
                 }
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+            try {
+                deleteClient();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private void deleteClient() throws IOException {
+        connection.close();
+        if (ServerCondition.rooms.containsKey(connectionUUID)) {
+            if (typeClient == 0) {
+//                Connection clientConnection = ServerCondition.rooms.get(connectionUUID);
+//                clientConnection.send(new Message(MessageType.TEXT, "Server: Агент разорвал соединение. Подождите пока подключится новый агент."));
+                ServerCondition.reGetAgent(connectionUUID);
+            } else {
+                ServerCondition.returnAgent(connectionUUID);
+            }
+        } else {
+            ServerCondition.deleteUUID(connectionUUID);
+        }
+        LOG.debug("HandlerClient. Client connection closed.");
     }
 }

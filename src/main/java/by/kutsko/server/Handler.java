@@ -35,12 +35,12 @@ public class Handler extends Thread {
             switch (message.getType()) {
                 case ADD_AGENT: {
                     ServerCondition.agentQueue.add(connection);
-                    new HandlerAgent(connection);
+                    new HandlerClient(connection, 0);
                     break;
                 }
                 case ADD_CLIENT: {
                     ServerCondition.clientDeque.add(connection);
-                    new HandlerClient(connection);
+                    new HandlerClient(connection, 1);
                     break;
                 }
                 default: {
