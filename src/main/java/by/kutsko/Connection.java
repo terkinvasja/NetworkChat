@@ -50,8 +50,6 @@ public class Connection implements Closeable {
     public boolean isClosed() {
         return socket.isClosed();
     }
-//TODO
-
 
     public String getConnectionUUID() {
         return connectionUUID;

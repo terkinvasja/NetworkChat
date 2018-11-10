@@ -18,7 +18,7 @@ public class Client {
     private static final Logger LOG = getLogger(Client.class);
     private Connection connection;
     private String name;
-    private final Pattern p = Pattern.compile("(/register) (agent|client) (\\w)+");
+    private final Pattern p = Pattern.compile("(/register) (agent|client) (\\w+)");
 
     public static void main(String[] args) {
 
@@ -33,9 +33,10 @@ public class Client {
             String message;
             if (!(message = ConsoleHelper.readString()).equals("/exit")) {
                 Matcher m = p.matcher(message);
-                String[] msg = message.split(" ");
-                if (msg[0].equals("/register")) {
-                    name = msg[2];
+                //String[] msg = message.split(" ");
+                if (m.matches()) {
+                    ConsoleHelper.writeMessage(String.format("%s, %s, %s", m.group(1), m.group(2), m.group(3)));
+                    name = m.group(3);
                     SocketThread socketThread = new SocketThread();
                     //Пометить созданный поток как daemon, это нужно для того, чтобы при выходе из программы
                     //вспомогательный поток прервался автоматически
@@ -56,9 +57,9 @@ public class Client {
 
                     LOG.debug("Client. Sending registration data");
                     try {
-                        if (msg[1].equals("agent")) {
+                        if (m.group(2).equals("agent")) {
                             connection.send(new Message(MessageType.ADD_AGENT, name));
-                        } else if (msg[1].equals("client")) {
+                        } else if (m.group(2).equals("client")) {
                             connection.send(new Message(MessageType.ADD_CLIENT, name));
                         }
                     } catch (IOException e) {
@@ -77,6 +78,8 @@ public class Client {
                             }
                         }
                     }
+                } else {
+                    ConsoleHelper.writeMessage("Некорректно введена команада.");
                 }
             } else {
                 return;
