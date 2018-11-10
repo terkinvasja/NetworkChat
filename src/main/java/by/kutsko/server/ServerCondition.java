@@ -34,6 +34,8 @@ public class ServerCondition {
                 if ((agentConnection != null) && (clientConnection != null)) {
                     rooms.put(agentConnection.getConnectionUUID(), clientConnection);
                     rooms.put(clientConnection.getConnectionUUID(), agentConnection);
+                    LOG.debug(String.format("%s and %s start chat.",
+                            agentConnection.getConnectionUUID(), clientConnection.getConnectionUUID()));
                     try {
                         agentConnection.send(new Message(MessageType.TEXT,
                                 String.format("Server: Клиент %s присоеденился к чату", clientConnection.getName())));
@@ -42,10 +44,10 @@ public class ServerCondition {
                         e.printStackTrace();
                     }
                 } else if (agentConnection != null) {
-                    System.out.println("agent return");
+                    LOG.debug(String.format("Agent %s return to queue.", agentConnection.getConnectionUUID()));
                     agentQueue.add(agentConnection);
                 } else if (clientConnection != null) {
-                    System.out.println("client return");
+                    LOG.debug(String.format("Client %s return to queue.", clientConnection.getConnectionUUID()));
                     clientDeque.add(clientConnection);
                 }
 
@@ -54,11 +56,12 @@ public class ServerCondition {
         LOG.debug("Server.getAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
     }
 
-    static synchronized void returnAgent(String connectionUUID){
+    static synchronized void returnAgent(String clientConnectionUUID){
         LOG.debug("Server.returnAgent");
-        Connection agentConnection = rooms.get(connectionUUID);
+        Connection agentConnection = rooms.get(clientConnectionUUID);
+        LOG.debug(String.format("Client %s end chat. Agent %s return to queue.", clientConnectionUUID, agentConnection.getConnectionUUID()));
         agentQueue.add(agentConnection);
-        rooms.remove(connectionUUID);
+        rooms.remove(clientConnectionUUID);
         String clientName = rooms.get(agentConnection.getConnectionUUID()).getName();
         rooms.remove(agentConnection.getConnectionUUID());
         try {
@@ -74,6 +77,7 @@ public class ServerCondition {
     static synchronized void reGetAgent(String connectionUUID) {
         Connection client = rooms.get(connectionUUID);
         rooms.remove(connectionUUID);
+        rooms.remove(client.getConnectionUUID());
         clientDeque.addFirst(client);
         LOG.debug("Server.reGetAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
         getAgent();
@@ -90,8 +94,10 @@ public class ServerCondition {
             connection = linkedQueue.poll();
             if (connection == null) break;
             if (!connection.isClosed()) {
+                LOG.debug(String.format("searchValidConnection. %s is connected.", connection.getConnectionUUID()));
                 break;
             } else {
+                LOG.debug(String.format("searchValidConnection. %s is closed.", connection.getConnectionUUID()));
                 connection = null;
             }
         } while (!agentQueue.isEmpty());

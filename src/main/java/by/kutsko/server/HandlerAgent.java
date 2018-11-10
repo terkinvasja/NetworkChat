@@ -34,7 +34,7 @@ public class HandlerAgent extends Thread {
 
                 switch (message.getType()) {
                     case TEXT: {
-                        ConsoleHelper.writeMessage(message.getData());
+//                        ConsoleHelper.writeMessage(message.getData());
                         if (ServerCondition.rooms.containsKey(connectionUUID)) {
                             ServerCondition.rooms.get(connectionUUID).send(message);
                         } else {
@@ -43,7 +43,6 @@ public class HandlerAgent extends Thread {
                         break;
                     }
                     case LEAVE: {
-
                         deleteAgent();
                         return;
                     }
@@ -67,8 +66,8 @@ public class HandlerAgent extends Thread {
     private void deleteAgent() throws IOException {
         connection.close();
         if (ServerCondition.rooms.containsKey(connectionUUID)) {
-            ServerCondition.rooms.get(connectionUUID)
-                    .send(new Message(MessageType.TEXT, "Server: Агент разорвал соединение"));
+            Connection clientConnection = ServerCondition.rooms.get(connectionUUID);
+            clientConnection.send(new Message(MessageType.TEXT, "Server: Агент разорвал соединение"));
             ServerCondition.reGetAgent(connectionUUID);
         } else {
             ServerCondition.deleteUUID(connectionUUID);

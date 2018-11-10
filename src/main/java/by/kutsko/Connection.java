@@ -34,7 +34,7 @@ public class Connection implements Closeable {
         synchronized (out) {
             out.writeObject(message);
             out.flush();
-            LOG.debug("Connection.send");
+//            LOG.debug("Connection.send");
         }
     }
 
@@ -42,7 +42,7 @@ public class Connection implements Closeable {
         Message message;
         synchronized (in) {
             message = (Message) in.readObject();
-            LOG.debug("Connection.receive");
+//            LOG.debug("Connection.receive");
             return message;
         }
     }

@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -16,6 +18,7 @@ public class Client {
     private static final Logger LOG = getLogger(Client.class);
     private Connection connection;
     private String name;
+    private final Pattern p = Pattern.compile("(/register) (agent|client) (\\w)+");
 
     public static void main(String[] args) {
 
@@ -29,6 +32,7 @@ public class Client {
             ConsoleHelper.writeMessage("Зарегистрируйтесь");
             String message;
             if (!(message = ConsoleHelper.readString()).equals("/exit")) {
+                Matcher m = p.matcher(message);
                 String[] msg = message.split(" ");
                 if (msg[0].equals("/register")) {
                     name = msg[2];
@@ -106,10 +110,8 @@ public class Client {
                 clientHandshake();
                 //Вызов метода, реализующего основной цикл обработки сообщений сервера.
                 clientMainLoop();
-            } catch (IOException e) {
-
-            } catch (ClassNotFoundException e) {
-
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
             }
         }
 

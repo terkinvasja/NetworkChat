@@ -31,7 +31,7 @@ public class HandlerClient extends Thread {
 
                 switch (message.getType()) {
                     case TEXT: {
-                        ConsoleHelper.writeMessage(message.getData());
+//                        ConsoleHelper.writeMessage(message.getData());
                         if (ServerCondition.rooms.containsKey(connection.getConnectionUUID())) {
                             ServerCondition.rooms.get(connection.getConnectionUUID()).send(message);
                         } else {
@@ -54,9 +54,7 @@ public class HandlerClient extends Thread {
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
