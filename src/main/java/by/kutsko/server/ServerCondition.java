@@ -19,7 +19,6 @@ public class ServerCondition {
     static ConcurrentLinkedQueue<Connection> agentQueue = new ConcurrentLinkedQueue<>();
     static ConcurrentLinkedDeque<Connection> clientDeque = new ConcurrentLinkedDeque<>();
     static ConcurrentHashMap<String, Connection> rooms = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, Connection> agents = new ConcurrentHashMap<>();
 
     static synchronized void getAgent() {
         Connection agentConnection;
@@ -54,7 +53,8 @@ public class ServerCondition {
     static synchronized void returnAgent(String clientConnectionUUID) {
         LOG.debug("Server.returnAgent");
         Connection agentConnection = rooms.get(clientConnectionUUID);
-        LOG.debug(String.format("Client %s end chat. Agent %s return to queue.", clientConnectionUUID, agentConnection.getConnectionUUID()));
+        LOG.debug(String.format("Client %s end chat. Agent %s return to queue.",
+                clientConnectionUUID, agentConnection.getConnectionUUID()));
         agentQueue.add(agentConnection);
         rooms.remove(clientConnectionUUID);
         String clientName = rooms.get(agentConnection.getConnectionUUID()).getName();
