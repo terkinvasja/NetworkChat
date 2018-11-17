@@ -6,32 +6,27 @@ import by.kutsko.MessageType;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 class ServerCondition {
     private static final Logger LOG = getLogger(ServerCondition.class);
 
-    private static final Queue<Connection> agentQueue = new LinkedList<>();
-    private static final Deque<Connection> clientDeque = new LinkedList<>();
+    private static final LinkedList<Connection> agentList = new LinkedList<>();
+    private static final LinkedList<Connection> clientList = new LinkedList<>();
     private static final HashMap<String, Connection> rooms = new HashMap<>();
 
     static void addAgent(Connection connection) {
-        synchronized (agentQueue) {
-            agentQueue.add(connection);
+        synchronized (agentList) {
+            agentList.add(connection);
         }
     }
 
     static void addClient(Connection connection) {
-        synchronized (clientDeque) {
-            clientDeque.add(connection);
+        synchronized (clientList) {
+            clientList.add(connection);
         }
     }
 
@@ -45,8 +40,8 @@ class ServerCondition {
         Connection agentConnection;
         Connection clientConnection;
 
-        agentConnection = searchValidConnection(agentQueue);
-        clientConnection = searchValidConnection(clientDeque);
+        agentConnection = searchValidConnection(agentList);
+        clientConnection = searchValidConnection(clientList);
 
         if ((agentConnection != null) && (clientConnection != null)) {
             rooms.put(agentConnection.getConnectionUUID(), clientConnection);
@@ -63,12 +58,12 @@ class ServerCondition {
             }
         } else if (agentConnection != null) {
             LOG.debug(String.format("Agent %s return to queue.", agentConnection.getConnectionUUID()));
-            agentQueue.add(agentConnection);
+            agentList.add(agentConnection);
         } else if (clientConnection != null) {
             LOG.debug(String.format("Client %s return to queue.", clientConnection.getConnectionUUID()));
-            clientDeque.add(clientConnection);
+            clientList.add(clientConnection);
         }
-        LOG.debug("Server.getAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
+        LOG.debug("Server.getAgent clientList=" + clientList.size() + ", agentList=" + agentList.size());
     }
 
     static synchronized void returnAgent(String clientConnectionUUID) {
@@ -76,7 +71,7 @@ class ServerCondition {
         Connection agentConnection = rooms.get(clientConnectionUUID);
         LOG.debug(String.format("Client %s end chat. Agent %s return to queue.",
                 clientConnectionUUID, agentConnection.getConnectionUUID()));
-        agentQueue.add(agentConnection);
+        agentList.add(agentConnection);
         rooms.remove(clientConnectionUUID);
         String clientName = rooms.get(agentConnection.getConnectionUUID()).getName();
         rooms.remove(agentConnection.getConnectionUUID());
@@ -86,7 +81,7 @@ class ServerCondition {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        LOG.debug("Server.returnAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
+        LOG.debug("Server.returnAgent clientList=" + clientList.size() + ", agentList=" + agentList.size());
         getAgent();
     }
 
@@ -94,20 +89,20 @@ class ServerCondition {
         Connection client = rooms.get(connectionUUID);
         rooms.remove(connectionUUID);
         rooms.remove(client.getConnectionUUID());
-        clientDeque.addFirst(client);
-        LOG.debug("Server.reGetAgent clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
+        clientList.addFirst(client);
+        LOG.debug("Server.reGetAgent clientList=" + clientList.size() + ", agentList=" + agentList.size());
         getAgent();
     }
 
     static synchronized void deleteUUID(String connectionUUID) {
         rooms.remove(connectionUUID);
-        LOG.debug("Server.deleteUUID clientDeque=" + clientDeque.size() + ", agentQueue=" + agentQueue.size());
+        LOG.debug("Server.deleteUUID clientList=" + clientList.size() + ", agentList=" + agentList.size());
     }
 
-    private static Connection searchValidConnection(Queue<Connection> linkedQueue) {
+    private static Connection searchValidConnection(LinkedList<Connection> linkedList) {
         Connection connection;
         do {
-            connection = linkedQueue.poll();
+            connection = linkedList.poll();
             if (connection == null) break;
             if (!connection.isClosed()) {
                 LOG.debug(String.format("searchValidConnection. %s is connected.", connection.getConnectionUUID()));
@@ -116,7 +111,7 @@ class ServerCondition {
                 LOG.debug(String.format("searchValidConnection. %s is closed.", connection.getConnectionUUID()));
                 connection = null;
             }
-        } while (!agentQueue.isEmpty());
+        } while (!linkedList.isEmpty());
         return connection;
     }
 
