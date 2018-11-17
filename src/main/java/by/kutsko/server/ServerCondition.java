@@ -57,13 +57,14 @@ class ServerCondition {
                 e.printStackTrace();
             }
         } else if (agentConnection != null) {
-            LOG.debug(String.format("Agent %s return to queue.", agentConnection.getConnectionUUID()));
+            LOG.debug(String.format("Agent %s return to list.", agentConnection.getConnectionUUID()));
             agentList.add(agentConnection);
         } else if (clientConnection != null) {
-            LOG.debug(String.format("Client %s return to queue.", clientConnection.getConnectionUUID()));
+            LOG.debug(String.format("Client %s return to list.", clientConnection.getConnectionUUID()));
             clientList.add(clientConnection);
         }
-        LOG.debug("Server.getAgent clientList=" + clientList.size() + ", agentList=" + agentList.size());
+        LOG.debug(String.format("Server.getAgent clientList=%s, agentList=%s",
+                clientList.size(), agentList.size()));
     }
 
     static synchronized void returnAgent(String clientConnectionUUID) {
@@ -81,7 +82,6 @@ class ServerCondition {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        LOG.debug("Server.returnAgent clientList=" + clientList.size() + ", agentList=" + agentList.size());
         getAgent();
     }
 
@@ -90,13 +90,13 @@ class ServerCondition {
         rooms.remove(connectionUUID);
         rooms.remove(client.getConnectionUUID());
         clientList.addFirst(client);
-        LOG.debug("Server.reGetAgent clientList=" + clientList.size() + ", agentList=" + agentList.size());
         getAgent();
     }
 
     static synchronized void deleteUUID(String connectionUUID) {
         rooms.remove(connectionUUID);
-        LOG.debug("Server.deleteUUID clientList=" + clientList.size() + ", agentList=" + agentList.size());
+        LOG.debug(String.format("Server.deleteUUID clientList=%s, agentList=%s",
+                clientList.size(), agentList.size()));
     }
 
     private static Connection searchValidConnection(LinkedList<Connection> linkedList) {
