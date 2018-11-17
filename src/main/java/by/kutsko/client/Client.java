@@ -4,6 +4,7 @@ import by.kutsko.Connection;
 import by.kutsko.util.ConsoleHelper;
 import by.kutsko.Message;
 import by.kutsko.MessageType;
+import by.kutsko.util.LogHelper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -35,22 +36,27 @@ public class Client {
                 Matcher m = p.matcher(message);
                 if (m.matches()) {
                     name = m.group(3);
-                    SocketThread socketThread = new SocketThread();
+
+                    //Создается объект класса Connection, используя сокет
+                    try {
+                        Socket socket = new Socket("localhost", 9750);
+                        connection = new Connection(socket);
+                        LOG.debug("Created new Connection");
+                    } catch (IOException e) {
+                        LOG.debug(LogHelper.exceptionToString(e));
+                    }
+
+                    HandlerServerConnection handlerServerConnection = new HandlerServerConnection(connection);
                     //Пометить созданный поток как daemon, это нужно для того, чтобы при выходе из программы
                     //вспомогательный поток прервался автоматически
-                    socketThread.setDaemon(true);
-                    socketThread.start();
+                    handlerServerConnection.setDaemon(true);
+                    handlerServerConnection.start();
 
-                    //Заставить текущий поток ожидать, пока он не получит нотификацию из другого потока
+                    //Текущий поток ожидает, пока он не получит
+                    //подтверждение подключения из другого потока
                     LOG.debug("Client. Wait notification from SocketThread");
-                    try {
-                        synchronized (this) {
-                            this.wait();
-                        }
-                    }
-                    catch (InterruptedException e) {
-                        ConsoleHelper.writeMessage("Ошибка");
-                        return;
+                    while (true) {
+                        if (connection.isConnected()) break;
                     }
 
                     LOG.debug("Client. Sending registration data");
@@ -61,7 +67,7 @@ public class Client {
                             connection.send(new Message(MessageType.ADD_CLIENT, name));
                         }
                     } catch (IOException e) {
-                        ConsoleHelper.writeMessage("Ошибка отправки");
+                        LOG.debug("Send error");
                     }
 
                     while (true) {
@@ -73,7 +79,7 @@ public class Client {
                                 connection.close();
                                 break;
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                LOG.debug(LogHelper.exceptionToString(e));
                             }
                         }
                     }
@@ -91,68 +97,6 @@ public class Client {
             connection.send(new Message(MessageType.TEXT, text));
         } catch (IOException e) {
             ConsoleHelper.writeMessage("Ошибка отправки");
-        }
-    }
-
-    /**
-     * SocketThread
-     **/
-    private class SocketThread extends Thread {
-
-        @Override
-        public void run() {
-            LOG.debug("Created new SocketThread");
-            try {
-                //Создается новый объект класса java.net.Socket
-                Socket socket = new Socket("localhost", 9750);
-                //Создается объект класса Connection, используя сокет
-                Client.this.connection = new Connection(socket);
-                LOG.debug("Created new Connection");
-                //Вызов метода, реализующий "рукопожатие" клиента с сервером (clientHandshake())
-                clientHandshake();
-                //Вызов метода, реализующего основной цикл обработки сообщений сервера.
-                clientMainLoop();
-            } catch (IOException | ClassNotFoundException e) {
-//                e.printStackTrace();
-            }
-        }
-
-        private void clientHandshake() throws IOException, ClassNotFoundException {
-            LOG.debug("SocketThread.clientHandshake");
-            while (true) {
-                Message message = connection.receive();
-
-                switch (message.getType()) {
-                    case ACCEPTED: {
-                        LOG.debug("SocketThread.clientHandshake.ACCEPTED");
-                        //Оповещать (пробуждать ожидающий) основной поток класса Client.
-                        synchronized (Client.this) {
-                            Client.this.notify();
-                        }
-                        return;
-                    }
-                    default: {
-                        throw new IOException("Unexpected MessageType");
-                    }
-                }
-            }
-        }
-
-        private void clientMainLoop() throws IOException, ClassNotFoundException {
-            LOG.debug("SocketThread.clientMainLoop");
-            while (true) {
-                Message message = connection.receive();
-
-                switch (message.getType()) {
-                    case TEXT: {
-                        ConsoleHelper.writeMessage(message.getData());
-                        break;
-                    }
-                    default: {
-                        throw new IOException("Unexpected MessageType");
-                    }
-                }
-            }
         }
     }
 }

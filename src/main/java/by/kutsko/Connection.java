@@ -1,5 +1,6 @@
 package by.kutsko;
 
+import by.kutsko.util.LogHelper;
 import org.slf4j.Logger;
 
 import java.io.Closeable;
@@ -15,6 +16,7 @@ public class Connection implements Closeable {
     private final Socket socket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
+    private volatile boolean isConnected = false;
     private String connectionUUID;
     private String name;
 
@@ -49,6 +51,14 @@ public class Connection implements Closeable {
         return socket.isClosed();
     }
 
+    public boolean isConnected() {
+        return isConnected;
+    }
+
+    public void setConnected(boolean connected) {
+        isConnected = connected;
+    }
+
     public String getConnectionUUID() {
         return connectionUUID;
     }
@@ -61,10 +71,23 @@ public class Connection implements Closeable {
         this.name = name;
     }
 
-    public void close() throws IOException {
-        in.close();
-        out.close();
-        socket.close();
+    public void close() {
+        try {
+            in.close();
+        } catch (IOException e) {
+            LOG.debug(LogHelper.exceptionToString(e));
+        }
+        try {
+            out.close();
+        } catch (IOException e) {
+            LOG.debug(LogHelper.exceptionToString(e));
+        }
+        try {
+            socket.close();
+        } catch (IOException e) {
+            LOG.debug(LogHelper.exceptionToString(e));
+        }
+        isConnected = false;
         LOG.debug("Connection.close");
     }
 }

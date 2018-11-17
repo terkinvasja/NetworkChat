@@ -6,6 +6,9 @@ import by.kutsko.MessageType;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -13,12 +16,30 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class ServerCondition {
+class ServerCondition {
     private static final Logger LOG = getLogger(ServerCondition.class);
 
-    static ConcurrentLinkedQueue<Connection> agentQueue = new ConcurrentLinkedQueue<>();
-    static ConcurrentLinkedDeque<Connection> clientDeque = new ConcurrentLinkedDeque<>();
-    static ConcurrentHashMap<String, Connection> rooms = new ConcurrentHashMap<>();
+    private static final Queue<Connection> agentQueue = new LinkedList<>();
+    private static final Deque<Connection> clientDeque = new LinkedList<>();
+    private static final HashMap<String, Connection> rooms = new HashMap<>();
+
+    static void addAgent(Connection connection) {
+        synchronized (agentQueue) {
+            agentQueue.add(connection);
+        }
+    }
+
+    static void addClient(Connection connection) {
+        synchronized (clientDeque) {
+            clientDeque.add(connection);
+        }
+    }
+
+    static HashMap<String, Connection> getRooms() {
+        synchronized (rooms) {
+            return rooms;
+        }
+    }
 
     static synchronized void getAgent() {
         Connection agentConnection;

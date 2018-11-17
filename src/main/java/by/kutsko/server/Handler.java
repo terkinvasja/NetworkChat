@@ -4,6 +4,7 @@ import by.kutsko.Connection;
 import by.kutsko.Message;
 import by.kutsko.MessageType;
 import by.kutsko.util.ConsoleHelper;
+import by.kutsko.util.LogHelper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -34,13 +35,13 @@ public class Handler extends Thread {
             connection.setName(message.getData());
             switch (message.getType()) {
                 case ADD_AGENT: {
-                    ServerCondition.agentQueue.add(connection);
-                    new HandlerClient(connection, 0);
+                    ServerCondition.addAgent(connection);
+                    new HandlerAgent(connection);
                     break;
                 }
                 case ADD_CLIENT: {
-                    ServerCondition.clientDeque.add(connection);
-                    new HandlerClient(connection, 1);
+                    ServerCondition.addClient(connection);
+                    new HandlerClient(connection);
                     break;
                 }
                 default: {
@@ -49,7 +50,7 @@ public class Handler extends Thread {
             }
             ServerCondition.getAgent();
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            LOG.debug(LogHelper.exceptionToString(e));
         }
         LOG.debug("Handler.close");
     }

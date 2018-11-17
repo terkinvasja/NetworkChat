@@ -7,9 +7,9 @@ import by.kutsko.util.LogHelper;
 
 import java.io.IOException;
 
-public class HandlerClient extends HandlerConnection {
+public class HandlerAgent extends HandlerConnection {
 
-    HandlerClient(Connection connection) {
+    public HandlerAgent(Connection connection) {
         super(connection);
     }
 
@@ -21,7 +21,7 @@ public class HandlerClient extends HandlerConnection {
             }
         } else {
             connection.send(new Message(MessageType.TEXT,
-                    "Server: Нет свободного агента. Пожалуйста подождите"));
+                    "Server: Нет подключенных клиентов"));
         }
     }
 
@@ -29,7 +29,14 @@ public class HandlerClient extends HandlerConnection {
     void deleteClient() {
         connection.close();
         if (ServerCondition.getRooms().containsKey(connectionUUID)) {
-            ServerCondition.returnAgent(connectionUUID);
+            Connection clientConnection = ServerCondition.getRooms().get(connectionUUID);
+            try {
+                clientConnection.send(new Message(MessageType.TEXT,
+                        "Server: Агент разорвал соединение. Подождите пока подключится новый агент."));
+            } catch (IOException e) {
+                LOG.debug(LogHelper.exceptionToString(e));
+            }
+            ServerCondition.reGetAgent(connectionUUID);
         } else {
             ServerCondition.deleteUUID(connectionUUID);
         }
