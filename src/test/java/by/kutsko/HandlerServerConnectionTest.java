@@ -1,6 +1,5 @@
-import by.kutsko.Connection;
-import by.kutsko.Message;
-import by.kutsko.MessageType;
+package by.kutsko;
+
 import by.kutsko.client.HandlerServerConnection;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

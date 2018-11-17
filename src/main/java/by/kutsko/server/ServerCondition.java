@@ -30,12 +30,6 @@ class ServerCondition {
         }
     }
 
-    static HashMap<String, Connection> getRooms() {
-        synchronized (rooms) {
-            return rooms;
-        }
-    }
-
     static synchronized void getAgent() {
         Connection agentConnection;
         Connection clientConnection;
@@ -100,8 +94,8 @@ class ServerCondition {
     }
 
     private static Connection searchValidConnection(LinkedList<Connection> linkedList) {
-        Connection connection;
-        do {
+        Connection connection = null;
+        while (!linkedList.isEmpty()) {
             connection = linkedList.poll();
             if (connection == null) break;
             if (!connection.isClosed()) {
@@ -111,8 +105,22 @@ class ServerCondition {
                 LOG.debug(String.format("searchValidConnection. %s is closed.", connection.getConnectionUUID()));
                 connection = null;
             }
-        } while (!linkedList.isEmpty());
+        }
         return connection;
+    }
+
+    static HashMap<String, Connection> getRooms() {
+        synchronized (rooms) {
+            return rooms;
+        }
+    }
+
+    static int getSizeAgentList() {
+        return agentList.size();
+    }
+
+    static int getSizeClientList() {
+        return clientList.size();
     }
 
 }
