@@ -18,8 +18,8 @@ public class ServerConditionTest {
 
     @Test
     public void testGetAgentGood() throws IOException {
-        Connection agentConnection = createAndAddAgent(agentConnectionUUID_1);
-        Connection clientConnection = createAndAddClient(clientConnectionUUID_1);
+        createAndAddAgent(agentConnectionUUID_1);
+        createAndAddClient(clientConnectionUUID_1);
 
         Assertions.assertEquals(ServerCondition.getSizeAgentList(), 1);
         Assertions.assertEquals(ServerCondition.getSizeClientList(), 1);
@@ -29,7 +29,7 @@ public class ServerConditionTest {
         Assertions.assertEquals(ServerCondition.getRooms().size(), 2);
 
         //Clear connection
-        closeAndRemoveConnection(agentConnection, clientConnection);
+        ServerCondition.clearAll();
     }
 
     @Test
@@ -46,7 +46,7 @@ public class ServerConditionTest {
         Assertions.assertEquals(ServerCondition.getRooms().size(), 0);
 
         //Clear connection
-        closeAndRemoveConnection(agentConnection, clientConnection);
+        ServerCondition.clearAll();
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ServerConditionTest {
         Assertions.assertEquals(ServerCondition.getRooms().size(), 0);
 
         //Clear connection
-        closeAndRemoveConnection(agentConnection, clientConnection);
+        ServerCondition.clearAll();
     }
 
     @Test
@@ -78,7 +78,7 @@ public class ServerConditionTest {
         Assertions.assertEquals(ServerCondition.getRooms().size(), 0);
 
         //Clear connection
-        closeAndRemoveConnection(agentConnection, clientConnection);
+        ServerCondition.clearAll();
     }
 
     @Test
@@ -88,7 +88,6 @@ public class ServerConditionTest {
         Connection clientConnection_1 = createAndAddClient(clientConnectionUUID_1);
 
         ServerCondition.getAgent();
-        System.out.println(ServerCondition.getRooms().size());
         Assertions.assertEquals(ServerCondition.getSizeAgentList(), 1);
         Assertions.assertEquals(ServerCondition.getSizeClientList(), 0);
         Assertions.assertEquals(ServerCondition.getRooms().size(), 2);
@@ -100,7 +99,7 @@ public class ServerConditionTest {
         Assertions.assertEquals(ServerCondition.getRooms().size(), 2);
 
         //Clear connection
-        closeAndRemoveConnection(agentConnection_2, clientConnection_1);
+        ServerCondition.clearAll();
     }
 
     private Connection createAndAddAgent(String connectionUUID) throws IOException {
@@ -113,13 +112,6 @@ public class ServerConditionTest {
         Connection connection = new UserConnection(connectionUUID);
         ServerCondition.addClient(connection);
         return connection;
-    }
-    private void closeAndRemoveConnection(Connection... connections) {
-        for (Connection connection : connections) {
-            ((UserConnection) connection).setClosed(true);
-            ServerCondition.getRooms().remove(connection.getConnectionUUID());
-        }
-        ServerCondition.getAgent();
     }
 
     private class UserConnection extends Connection {

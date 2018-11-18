@@ -123,4 +123,10 @@ class ServerCondition {
         return clientList.size();
     }
 
+    static synchronized void clearAll() {
+        rooms.clear();
+        agentList.clear();
+        clientList.clear();
+    }
+
 }

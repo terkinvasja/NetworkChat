@@ -25,6 +25,8 @@ public class HandlerTest {
         Handler handler = new Handler(new UserSocket());
         handler.run();
         Assertions.assertEquals(ServerCondition.getSizeAgentList(), 1);
+
+        ServerCondition.clearAll();
     }
 
 
