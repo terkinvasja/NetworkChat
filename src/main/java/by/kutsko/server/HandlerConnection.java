@@ -55,11 +55,7 @@ public abstract class HandlerConnection extends Thread {
         }
     }
 
-    void send(Message message) throws IOException {
+    abstract void send(Message message) throws IOException;
 
-    }
-
-    void deleteClient() {
-
-    }
+    abstract void deleteClient();
 }
