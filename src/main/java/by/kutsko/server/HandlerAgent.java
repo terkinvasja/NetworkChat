@@ -38,7 +38,7 @@ public class HandlerAgent extends HandlerConnection {
             }
             ServerCondition.reGetAgent(connectionUUID);
         } else {
-            ServerCondition.deleteUUID(connectionUUID);
+//            ServerCondition.deleteUUID(connectionUUID);
         }
         LOG.debug("HandlerConnection. Client connection closed.");
     }

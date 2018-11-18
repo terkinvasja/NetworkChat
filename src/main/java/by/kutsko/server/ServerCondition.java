@@ -52,10 +52,10 @@ class ServerCondition {
             }
         } else if (agentConnection != null) {
             LOG.debug(String.format("Agent %s return to list.", agentConnection.getConnectionUUID()));
-            agentList.add(agentConnection);
+            agentList.addFirst(agentConnection);
         } else if (clientConnection != null) {
             LOG.debug(String.format("Client %s return to list.", clientConnection.getConnectionUUID()));
-            clientList.add(clientConnection);
+            clientList.addFirst(clientConnection);
         }
         LOG.debug(String.format("Server.getAgent clientList=%s, agentList=%s",
                 clientList.size(), agentList.size()));
@@ -97,7 +97,7 @@ class ServerCondition {
         Connection connection = null;
         while (!linkedList.isEmpty()) {
             connection = linkedList.poll();
-            if (connection == null) break;
+//            if (connection == null) break;
             if (!connection.isClosed()) {
                 LOG.debug(String.format("searchValidConnection. %s is connected.", connection.getConnectionUUID()));
                 break;

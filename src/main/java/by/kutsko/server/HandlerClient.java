@@ -31,7 +31,7 @@ public class HandlerClient extends HandlerConnection {
         if (ServerCondition.getRooms().containsKey(connectionUUID)) {
             ServerCondition.returnAgent(connectionUUID);
         } else {
-            ServerCondition.deleteUUID(connectionUUID);
+//            ServerCondition.deleteUUID(connectionUUID);
         }
         LOG.debug("HandlerConnection. Client connection closed.");
     }
