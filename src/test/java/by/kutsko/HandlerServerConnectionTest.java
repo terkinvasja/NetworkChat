@@ -27,7 +27,7 @@ public class HandlerServerConnectionTest {
     @Test
     public void testRun() throws IOException {
 
-        UserConnection uc = new UserConnection(new Socket());
+        UserConnection uc = new UserConnection();
 
 
         System.setOut(new PrintStream(outContent));
@@ -50,22 +50,8 @@ public class HandlerServerConnectionTest {
 
     private class UserConnection extends Connection {
 
-        public UserConnection(Socket socket) throws IOException {
-            super(new Socket(){
-                @Override
-                public InputStream getInputStream() throws IOException {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ObjectOutputStream oos = new ObjectOutputStream(baos);
-                    oos.writeObject(new Message(MessageType.LEAVE));
-                    oos.flush();
-                    return new ByteArrayInputStream(baos.toByteArray());
-                }
-
-                @Override
-                public OutputStream getOutputStream() throws IOException {
-                    return new ByteArrayOutputStream();
-                }
-            });
+        public UserConnection() throws IOException {
+            super(new MockUserSocket(new Message(MessageType.LEAVE)));
         }
 
         @Override
