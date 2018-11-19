@@ -2,6 +2,7 @@ package by.kutsko.client;
 
 import by.kutsko.Connection;
 import by.kutsko.Message;
+import by.kutsko.MessageType;
 import by.kutsko.util.ConsoleHelper;
 import org.slf4j.Logger;
 
@@ -14,9 +15,11 @@ public class HandlerServerConnection extends Thread {
     private static final Logger LOG = getLogger(HandlerServerConnection.class);
 
     private Connection connection;
+    private History history;
 
-    public HandlerServerConnection(Connection connection) {
+    public HandlerServerConnection(Connection connection, History history) {
         this.connection = connection;
+        this.history = history;
     }
 
     @Override
@@ -59,6 +62,14 @@ public class HandlerServerConnection extends Thread {
             switch (message.getType()) {
                 case TEXT: {
                     ConsoleHelper.writeMessage(message.getData());
+                    history.addText(message.getData());
+                    break;
+                }
+                case CHANGE_AGENT: {
+                    ConsoleHelper.writeMessage(message.getData());
+                    for (String text : history.getListHistory()) {
+                        connection.send(new Message(MessageType.TEXT, text));
+                    }
                     break;
                 }
                 case LEAVE: {

@@ -1,6 +1,7 @@
 package by.kutsko;
 
 import by.kutsko.client.HandlerServerConnection;
+import by.kutsko.client.History;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,10 +30,9 @@ public class HandlerServerConnectionTest {
 
         UserConnection uc = new UserConnection();
 
-
         System.setOut(new PrintStream(outContent));
 
-        HandlerServerConnection hsc = new HandlerServerConnection(uc);
+        HandlerServerConnection hsc = new HandlerServerConnection(uc, new History());
         hsc.run();
 
         StringBuilder sb = new StringBuilder();

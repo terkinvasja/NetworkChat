@@ -5,5 +5,6 @@ public enum MessageType {
     ADD_CLIENT,
     ACCEPTED,
     LEAVE,
-    TEXT
+    TEXT,
+    CHANGE_AGENT
 }

@@ -19,6 +19,7 @@ public class Client {
     private static final Logger LOG = getLogger(Client.class);
     private Connection connection;
     private String name;
+    private History history = new History();
     private final Pattern p = Pattern.compile("(/register) (agent|client) (\\w+)");
 
     public static void main(String[] args) {
@@ -46,7 +47,7 @@ public class Client {
                         LOG.debug(LogHelper.exceptionToString(e));
                     }
 
-                    HandlerServerConnection handlerServerConnection = new HandlerServerConnection(connection);
+                    HandlerServerConnection handlerServerConnection = new HandlerServerConnection(connection, history);
                     //Пометить созданный поток как daemon, это нужно для того, чтобы при выходе из программы
                     //вспомогательный поток прервался автоматически
                     handlerServerConnection.setDaemon(true);
@@ -74,6 +75,7 @@ public class Client {
                         if (!(message = ConsoleHelper.readString()).equals("/leave")) {
                             sendTextMessage(name + ": " + message);
                         } else {
+                            history.clearHistory();
                             try {
                                 connection.send(new Message(MessageType.LEAVE));
                                 connection.close();
@@ -94,6 +96,7 @@ public class Client {
 
     private void sendTextMessage(String text) {
         try {
+            history.addText(text);
             connection.send(new Message(MessageType.TEXT, text));
         } catch (IOException e) {
             ConsoleHelper.writeMessage("Ошибка отправки");

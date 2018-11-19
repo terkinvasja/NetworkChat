@@ -45,7 +45,7 @@ class ServerCondition {
             try {
                 agentConnection.send(new Message(MessageType.TEXT,
                         String.format("Server: Клиент %s присоеденился к чату", clientConnection.getName())));
-                clientConnection.send(new Message(MessageType.TEXT,
+                clientConnection.send(new Message(MessageType.CHANGE_AGENT,
                         "Server: Ваш агент " + agentConnection.getName()));
             } catch (IOException e) {
                 e.printStackTrace();
