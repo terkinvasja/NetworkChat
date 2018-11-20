@@ -31,7 +31,7 @@ public class HandlerServerConnection extends Thread {
             //Вызов метода, реализующего основной цикл обработки сообщений сервера.
             clientMainLoop();
         } catch (IOException | ClassNotFoundException e) {
-//                LOG.debug(LogHelper.exceptionToString(e))
+//                LOG.debug("", e)
         }
     }
 

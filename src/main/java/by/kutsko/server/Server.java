@@ -1,7 +1,6 @@
 package by.kutsko.server;
 
 import by.kutsko.util.ConsoleHelper;
-import by.kutsko.util.LogHelper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -31,7 +30,7 @@ public class Server {
                 servicePool.submit(handler);
             }
         } catch (IOException e) {
-            LOG.debug(LogHelper.exceptionToString(e));
+            LOG.debug("", e);
         }
     }
 }

@@ -3,7 +3,6 @@ package by.kutsko.server;
 import by.kutsko.Connection;
 import by.kutsko.Message;
 import by.kutsko.MessageType;
-import by.kutsko.util.LogHelper;
 
 import java.io.IOException;
 

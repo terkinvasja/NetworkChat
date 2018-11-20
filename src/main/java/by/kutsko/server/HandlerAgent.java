@@ -3,7 +3,6 @@ package by.kutsko.server;
 import by.kutsko.Connection;
 import by.kutsko.Message;
 import by.kutsko.MessageType;
-import by.kutsko.util.LogHelper;
 
 import java.io.IOException;
 
@@ -34,7 +33,7 @@ public class HandlerAgent extends HandlerConnection {
                 clientConnection.send(new Message(MessageType.TEXT,
                         "Server: Агент разорвал соединение. Подождите пока подключится новый агент."));
             } catch (IOException e) {
-                LOG.debug(LogHelper.exceptionToString(e));
+                LOG.debug("", e);
             }
             ServerCondition.reGetAgent(connectionUUID);
         } else {

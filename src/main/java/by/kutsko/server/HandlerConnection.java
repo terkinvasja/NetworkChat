@@ -2,8 +2,6 @@ package by.kutsko.server;
 
 import by.kutsko.Connection;
 import by.kutsko.Message;
-import by.kutsko.MessageType;
-import by.kutsko.util.LogHelper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -48,10 +46,10 @@ public abstract class HandlerConnection extends Thread {
                 }
             }
         } catch (IOException e) {
-            LOG.debug(LogHelper.exceptionToString(e));
+            LOG.debug("", e);
             deleteClient();
         } catch (ClassNotFoundException e) {
-            LOG.debug(LogHelper.exceptionToString(e));
+            LOG.debug("", e);
         }
     }
 

@@ -4,7 +4,6 @@ import by.kutsko.Connection;
 import by.kutsko.Message;
 import by.kutsko.MessageType;
 import by.kutsko.util.ConsoleHelper;
-import by.kutsko.util.LogHelper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -50,7 +49,7 @@ public class Handler extends Thread {
             }
             ServerCondition.getAgent();
         } catch (IOException | ClassNotFoundException e) {
-            LOG.debug(LogHelper.exceptionToString(e));
+            LOG.debug("", e);
         }
         LOG.debug("Handler.close");
     }

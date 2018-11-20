@@ -1,6 +1,5 @@
 package by.kutsko;
 
-import by.kutsko.util.LogHelper;
 import org.slf4j.Logger;
 
 import java.io.Closeable;
@@ -75,17 +74,17 @@ public class Connection implements Closeable {
         try {
             in.close();
         } catch (IOException e) {
-            LOG.debug(LogHelper.exceptionToString(e));
+            LOG.debug("", e);
         }
         try {
             out.close();
         } catch (IOException e) {
-            LOG.debug(LogHelper.exceptionToString(e));
+            LOG.debug("", e);
         }
         try {
             socket.close();
         } catch (IOException e) {
-            LOG.debug(LogHelper.exceptionToString(e));
+            LOG.debug("", e);
         }
         isConnected = false;
         LOG.debug("Connection.close");

@@ -4,7 +4,6 @@ import by.kutsko.Connection;
 import by.kutsko.util.ConsoleHelper;
 import by.kutsko.Message;
 import by.kutsko.MessageType;
-import by.kutsko.util.LogHelper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -44,7 +43,7 @@ public class Client {
                         connection = new Connection(socket);
                         LOG.debug("Created new Connection");
                     } catch (IOException e) {
-                        LOG.debug(LogHelper.exceptionToString(e));
+                        LOG.debug("", e);
                     }
 
                     HandlerServerConnection handlerServerConnection = new HandlerServerConnection(connection, history);
@@ -81,7 +80,7 @@ public class Client {
                                 connection.close();
                                 break;
                             } catch (IOException e) {
-                                LOG.debug(LogHelper.exceptionToString(e));
+                                LOG.debug("", e);
                             }
                         }
                     }
